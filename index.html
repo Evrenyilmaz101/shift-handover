@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -841,15 +840,48 @@ function doPost(e) {
             }
 
             Array.from(files).forEach(file => {
-                if (file.size > 500 * 1024) {
-                    alert('Image too large. Please use images under 500KB.');
-                    return;
-                }
-                
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    jobImages[jobId].push(e.target.result);
-                    displayImages(jobId);
+                    // Create an image to compress it
+                    const img = new Image();
+                    img.onload = function() {
+                        // Create canvas for compression
+                        const canvas = document.createElement('canvas');
+                        
+                        // Calculate new dimensions (max 400px width/height)
+                        let width = img.width;
+                        let height = img.height;
+                        const maxDimension = 400;
+                        
+                        if (width > height && width > maxDimension) {
+                            height = (height / width) * maxDimension;
+                            width = maxDimension;
+                        } else if (height > maxDimension) {
+                            width = (width / height) * maxDimension;
+                            height = maxDimension;
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // Compress to JPEG with quality 0.5 (50%)
+                        const compressedImage = canvas.toDataURL('image/jpeg', 0.5);
+                        
+                        // Check size (base64 string length roughly equals file size)
+                        const sizeInKB = compressedImage.length / 1024;
+                        
+                        if (sizeInKB > 100) {
+                            alert('Image still too large after compression. Please use a smaller image or fewer photos.');
+                            return;
+                        }
+                        
+                        jobImages[jobId].push(compressedImage);
+                        displayImages(jobId);
+                    };
+                    img.src = e.target.result;
                 };
                 reader.readAsDataURL(file);
             });
