@@ -683,7 +683,6 @@ function doPost(e) {
 
     <script>
         let jobCounter = 0;
-        let jobImages = {};
         let WEB_APP_URL = '';
         let allReports = [];
 
@@ -777,17 +776,9 @@ function doPost(e) {
 • Press Enter for a new bullet point
 • Each line becomes a bullet" required></textarea>
                 </div>
-                <div class="image-upload-section">
-                    <label class="image-upload-label" for="imageUpload-${jobCounter}">
-                        📷 Add Photos
-                    </label>
-                    <input type="file" id="imageUpload-${jobCounter}" class="image-upload-input" accept="image/*" multiple onchange="handleImageUpload(${jobCounter}, event)">
-                    <div id="imagePreview-${jobCounter}" class="image-preview-container"></div>
-                </div>
             `;
             
             jobsContainer.appendChild(jobEntry);
-            jobImages[jobCounter] = [];
             
             setupBulletTextarea(`workDone-${jobCounter}`);
             setupBulletTextarea(`workPending-${jobCounter}`);
@@ -908,7 +899,6 @@ function doPost(e) {
             const jobEntry = document.getElementById(`job-${id}`);
             if (jobEntry) {
                 jobEntry.remove();
-                delete jobImages[id];
             }
         }
 
@@ -935,14 +925,12 @@ function doPost(e) {
                 const jobNumber = document.getElementById(`jobNumber-${id}`).value;
                 const workDone = document.getElementById(`workDone-${id}`).value;
                 const workPending = document.getElementById(`workPending-${id}`).value;
-                const images = jobImages[id] || [];
 
                 if (jobNumber && (workDone || workPending)) {
                     jobs.push({
                         jobNumber,
                         workDone,
-                        workPending,
-                        images
+                        workPending
                     });
                 }
             });
@@ -1066,18 +1054,6 @@ function doPost(e) {
                                     <strong>Job #${job.jobNumber}</strong>
                                     ${job.workDone ? `<p><strong>Work Done:</strong></p><div style="white-space: pre-wrap; line-height: 1.8;">${job.workDone}</div>` : ''}
                                     ${job.workPending ? `<p><strong>Work Pending:</strong></p><div style="white-space: pre-wrap; line-height: 1.8;">${job.workPending}</div>` : ''}
-                                    ${job.images && job.images.length > 0 ? `
-                                        <div style="margin-top: 10px;">
-                                            <strong>Photos:</strong>
-                                            <div class="image-preview-container">
-                                                ${job.images.map(img => `
-                                                    <div class="image-preview">
-                                                        <img src="${img}" alt="Job photo">
-                                                    </div>
-                                                `).join('')}
-                                            </div>
-                                        </div>
-                                    ` : ''}
                                 </div>
                             `).join('')}
                         </div>
@@ -1105,7 +1081,6 @@ function doPost(e) {
             
             document.getElementById('jobsContainer').innerHTML = '';
             jobCounter = 0;
-            jobImages = {};
             
             document.getElementById('shiftDate').value = report.date;
             document.getElementById('handoverBy').value = report.handoverBy;
@@ -1117,11 +1092,6 @@ function doPost(e) {
                 document.getElementById(`jobNumber-${currentJobId}`).value = job.jobNumber;
                 document.getElementById(`workDone-${currentJobId}`).value = job.workDone;
                 document.getElementById(`workPending-${currentJobId}`).value = job.workPending;
-                
-                if (job.images && job.images.length > 0) {
-                    jobImages[currentJobId] = [...job.images];
-                    displayImages(currentJobId);
-                }
             });
             
             allReports = allReports.filter(r => r.id !== reportId);
@@ -1243,7 +1213,6 @@ function doPost(e) {
             document.getElementById('handoverBy').value = '';
             document.getElementById('jobsContainer').innerHTML = '';
             jobCounter = 0;
-            jobImages = {};
             addJob();
         }
 
