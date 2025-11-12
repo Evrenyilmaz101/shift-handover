@@ -156,72 +156,6 @@
             color: #2c3e50;
         }
 
-        .image-upload-section {
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid #e0e0e0;
-        }
-
-        .image-upload-label {
-            display: inline-block;
-            padding: 10px 20px;
-            background: #3498db;
-            color: white;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background 0.3s;
-        }
-
-        .image-upload-label:hover {
-            background: #2980b9;
-        }
-
-        .image-upload-input {
-            display: none;
-        }
-
-        .image-preview-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .image-preview {
-            position: relative;
-            width: 150px;
-            height: 150px;
-            border-radius: 5px;
-            overflow: hidden;
-            border: 2px solid #e0e0e0;
-        }
-
-        .image-preview img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .image-remove-btn {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background: #e74c3c;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 25px;
-            height: 25px;
-            cursor: pointer;
-            font-size: 16px;
-            line-height: 1;
-        }
-
-        .image-remove-btn:hover {
-            background: #c0392b;
-        }
-
         .remove-btn {
             background: #e74c3c;
             color: white;
@@ -583,7 +517,7 @@
                     <ol>
                         <li>In your Google Sheet, click <strong>Extensions</strong> → <strong>Apps Script</strong></li>
                         <li>Delete any existing code in the editor</li>
-                        <li>Copy and paste this code (I'll provide it below)</li>
+                        <li>Copy and paste this code (see below)</li>
                         <li>Click the <strong>Save</strong> icon (💾)</li>
                         <li>Click <strong>Deploy</strong> → <strong>New deployment</strong></li>
                         <li>Click the gear icon ⚙️ next to "Select type" → choose <strong>Web app</strong></li>
@@ -591,7 +525,7 @@
                         <li>Set "Who has access" to <strong>Anyone</strong></li>
                         <li>Click <strong>Deploy</strong></li>
                         <li>Click <strong>Authorize access</strong> and complete the authorization</li>
-                        <li>Copy the <strong>Web app URL</strong> (looks like: https://script.google.com/...)</li>
+                        <li>Copy the <strong>Web app URL</strong></li>
                     </ol>
                 </div>
 
@@ -613,26 +547,27 @@ function doGet(e) {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Reports') || 
                 SpreadsheetApp.getActiveSpreadsheet().insertSheet('Reports');
   
+  // Check if this is a save operation
+  if (e.parameter.action === 'save') {
+    const reports = JSON.parse(e.parameter.data);
+    sheet.clear();
+    sheet.getRange(1, 1).setValue(JSON.stringify(reports));
+    return ContentService.createTextOutput(JSON.stringify({success: true}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  // Otherwise, load data
   const lastRow = sheet.getLastRow();
   if (lastRow === 0) {
-    return ContentService.createTextOutput(JSON.stringify([])).setMimeType(ContentService.MimeType.JSON);
+    return ContentService.createTextOutput(JSON.stringify([]))
+      .setMimeType(ContentService.MimeType.JSON);
   }
   
   const data = sheet.getRange(1, 1, lastRow, 1).getValues();
   const reports = data[0][0] ? JSON.parse(data[0][0]) : [];
   
-  return ContentService.createTextOutput(JSON.stringify(reports)).setMimeType(ContentService.MimeType.JSON);
-}
-
-function doPost(e) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Reports') || 
-                SpreadsheetApp.getActiveSpreadsheet().insertSheet('Reports');
-  
-  const reports = JSON.parse(e.postData.contents);
-  sheet.clear();
-  sheet.getRange(1, 1).setValue(JSON.stringify(reports));
-  
-  return ContentService.createTextOutput(JSON.stringify({success: true})).setMimeType(ContentService.MimeType.JSON);
+  return ContentService.createTextOutput(JSON.stringify(reports))
+    .setMimeType(ContentService.MimeType.JSON);
 }</pre>
                 </div>
 
@@ -683,7 +618,6 @@ function doPost(e) {
 
     <script>
         let jobCounter = 0;
-        let jobImages = {};
         let WEB_APP_URL = '';
         let allReports = [];
 
@@ -777,17 +711,9 @@ function doPost(e) {
 • Press Enter for a new bullet point
 • Each line becomes a bullet" required></textarea>
                 </div>
-                <div class="image-upload-section">
-                    <label class="image-upload-label" for="imageUpload-${jobCounter}">
-                        📷 Add Photos
-                    </label>
-                    <input type="file" id="imageUpload-${jobCounter}" class="image-upload-input" accept="image/*" multiple onchange="handleImageUpload(${jobCounter}, event)">
-                    <div id="imagePreview-${jobCounter}" class="image-preview-container"></div>
-                </div>
             `;
             
             jobsContainer.appendChild(jobEntry);
-            jobImages[jobCounter] = [];
             
             setupBulletTextarea(`workDone-${jobCounter}`);
             setupBulletTextarea(`workPending-${jobCounter}`);
@@ -833,49 +759,10 @@ function doPost(e) {
             });
         }
 
-        function handleImageUpload(jobId, event) {
-            const files = event.target.files;
-            if (!jobImages[jobId]) {
-                jobImages[jobId] = [];
-            }
-
-            Array.from(files).forEach(file => {
-                if (file.size > 500 * 1024) {
-                    alert('Image too large. Please use images under 500KB.');
-                    return;
-                }
-                
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    jobImages[jobId].push(e.target.result);
-                    displayImages(jobId);
-                };
-                reader.readAsDataURL(file);
-            });
-        }
-
-        function displayImages(jobId) {
-            const container = document.getElementById(`imagePreview-${jobId}`);
-            if (!container) return;
-
-            container.innerHTML = jobImages[jobId].map((img, index) => `
-                <div class="image-preview">
-                    <img src="${img}" alt="Job photo ${index + 1}">
-                    <button class="image-remove-btn" onclick="removeImage(${jobId}, ${index})">&times;</button>
-                </div>
-            `).join('');
-        }
-
-        function removeImage(jobId, imageIndex) {
-            jobImages[jobId].splice(imageIndex, 1);
-            displayImages(jobId);
-        }
-
         function removeJob(id) {
             const jobEntry = document.getElementById(`job-${id}`);
             if (jobEntry) {
                 jobEntry.remove();
-                delete jobImages[id];
             }
         }
 
@@ -902,14 +789,12 @@ function doPost(e) {
                 const jobNumber = document.getElementById(`jobNumber-${id}`).value;
                 const workDone = document.getElementById(`workDone-${id}`).value;
                 const workPending = document.getElementById(`workPending-${id}`).value;
-                const images = jobImages[id] || [];
 
                 if (jobNumber && (workDone || workPending)) {
                     jobs.push({
                         jobNumber,
                         workDone,
-                        workPending,
-                        images
+                        workPending
                     });
                 }
             });
@@ -1033,18 +918,6 @@ function doPost(e) {
                                     <strong>Job #${job.jobNumber}</strong>
                                     ${job.workDone ? `<p><strong>Work Done:</strong></p><div style="white-space: pre-wrap; line-height: 1.8;">${job.workDone}</div>` : ''}
                                     ${job.workPending ? `<p><strong>Work Pending:</strong></p><div style="white-space: pre-wrap; line-height: 1.8;">${job.workPending}</div>` : ''}
-                                    ${job.images && job.images.length > 0 ? `
-                                        <div style="margin-top: 10px;">
-                                            <strong>Photos:</strong>
-                                            <div class="image-preview-container">
-                                                ${job.images.map(img => `
-                                                    <div class="image-preview">
-                                                        <img src="${img}" alt="Job photo">
-                                                    </div>
-                                                `).join('')}
-                                            </div>
-                                        </div>
-                                    ` : ''}
                                 </div>
                             `).join('')}
                         </div>
@@ -1072,7 +945,6 @@ function doPost(e) {
             
             document.getElementById('jobsContainer').innerHTML = '';
             jobCounter = 0;
-            jobImages = {};
             
             document.getElementById('shiftDate').value = report.date;
             document.getElementById('handoverBy').value = report.handoverBy;
@@ -1084,11 +956,6 @@ function doPost(e) {
                 document.getElementById(`jobNumber-${currentJobId}`).value = job.jobNumber;
                 document.getElementById(`workDone-${currentJobId}`).value = job.workDone;
                 document.getElementById(`workPending-${currentJobId}`).value = job.workPending;
-                
-                if (job.images && job.images.length > 0) {
-                    jobImages[currentJobId] = [...job.images];
-                    displayImages(currentJobId);
-                }
             });
             
             allReports = allReports.filter(r => r.id !== reportId);
@@ -1210,7 +1077,6 @@ function doPost(e) {
             document.getElementById('handoverBy').value = '';
             document.getElementById('jobsContainer').innerHTML = '';
             jobCounter = 0;
-            jobImages = {};
             addJob();
         }
 
