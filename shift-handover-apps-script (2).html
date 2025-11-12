@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shift Handover Report - Thornton Engineering</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: #34495e;
+            border-bottom: 3px solid #2c3e50;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 15px 20px;
+            background: #34495e;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background 0.3s;
+            border-right: 1px solid #2c3e50;
+        }
+
+        .nav-tab:last-child {
+            border-right: none;
+        }
+
+        .nav-tab:hover {
+            background: #3d566e;
+        }
+
+        .nav-tab.active {
+            background: white;
+            color: #2c3e50;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .form-section {
+            padding: 30px;
+        }
+
+        .shift-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+            line-height: 1.8;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        textarea::placeholder {
+            color: #999;
+        }
+
+        .job-entry {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .job-entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .job-entry-title {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .image-upload-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .image-upload-label {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .image-upload-label:hover {
+            background: #2980b9;
+        }
+
+        .image-upload-input {
+            display: none;
+        }
+
+        .image-preview-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .image-preview {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            border-radius: 5px;
+            overflow: hidden;
+            border: 2px solid #e0e0e0;
+        }
+
+        .image-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .image-remove-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 1;
+        }
+
+        .image-remove-btn:hover {
+            background: #c0392b;
+        }
+
+        .remove-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.3s;
+        }
+
+        .remove-btn:hover {
+            background: #c0392b;
+        }
+
+        .add-job-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.3s;
+            margin-bottom: 20px;
+        }
+
+        .add-job-btn:hover {
+            background: #5568d3;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .submit-btn, .export-btn, .clear-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .submit-btn {
+            background: #27ae60;
+            color: white;
+        }
+
+        .submit-btn:hover {
+            background: #229954;
+            transform: translateY(-2px);
+        }
+
+        .submit-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .export-btn {
+            background: #3498db;
+            color: white;
+        }
+
+        .export-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .clear-btn {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .clear-btn:hover {
+            background: #7f8c8d;
+        }
+
+        .reports-section {
+            padding: 30px;
+            background: #f8f9fa;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .reports-section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .report-item {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .report-item:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .report-item.expanded {
+            cursor: default;
+        }
+
+        .report-summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .report-date {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .report-expand-icon {
+            font-size: 20px;
+            color: #7f8c8d;
+            transition: transform 0.3s;
+        }
+
+        .report-item.expanded .report-expand-icon {
+            transform: rotate(90deg);
+        }
+
+        .report-details {
+            display: none;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .report-item.expanded .report-details {
+            display: block;
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .report-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .export-report-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .export-report-btn:hover {
+            background: #2980b9;
+        }
+
+        .edit-report-btn {
+            background: #f39c12;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .edit-report-btn:hover {
+            background: #e67e22;
+        }
+
+        .report-meta {
+            font-size: 13px;
+            color: #7f8c8d;
+        }
+
+        .report-jobs {
+            margin-top: 15px;
+        }
+
+        .report-job {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .report-job strong {
+            color: #2c3e50;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .report-job p {
+            margin: 5px 0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .delete-report-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .delete-report-btn:hover {
+            background: #c0392b;
+        }
+
+        .no-reports {
+            text-align: center;
+            color: #7f8c8d;
+            padding: 40px;
+            font-style: italic;
+        }
+
+        .loading {
+            text-align: center;
+            color: #7f8c8d;
+            padding: 40px;
+        }
+
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        .sync-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #27ae60;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            display: none;
+        }
+
+        .sync-status.show {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .setup-box {
+            background: #e8f4f8;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3498db;
+        }
+
+        .setup-box h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .setup-box ol {
+            line-height: 2;
+            color: #2c3e50;
+            margin-left: 20px;
+        }
+
+        .setup-box code {
+            background: #fff;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #e74c3c;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: #856404;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+            .container {
+                box-shadow: none;
+            }
+            .form-section, .button-group, .add-job-btn, .remove-btn {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 Shift Handover Report</h1>
+            <p>Thornton Engineering - Vessel Shop</p>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchPage('input')">Create Report</button>
+            <button class="nav-tab" onclick="switchPage('reports')">Saved Reports</button>
+            <button class="nav-tab" onclick="switchPage('setup')">⚙️ Setup</button>
+        </div>
+
+        <!-- SETUP PAGE -->
+        <div id="setupPage" class="page">
+            <div class="form-section">
+                <h2 style="color: #2c3e50; margin-bottom: 20px;">Simple Cloud Setup (Google Apps Script)</h2>
+                
+                <div class="setup-box">
+                    <h3>📝 Step 1: Create Your Google Sheet</h3>
+                    <ol>
+                        <li>Go to <a href="https://sheets.google.com" target="_blank">sheets.google.com</a></li>
+                        <li>Create a new blank spreadsheet</li>
+                        <li>Name it "Shift Handover Reports"</li>
+                        <li>Keep this tab open</li>
+                    </ol>
+                </div>
+
+                <div class="setup-box">
+                    <h3>⚙️ Step 2: Add Apps Script Code</h3>
+                    <ol>
+                        <li>In your Google Sheet, click <strong>Extensions</strong> → <strong>Apps Script</strong></li>
+                        <li>Delete any existing code in the editor</li>
+                        <li>Copy and paste this code (I'll provide it below)</li>
+                        <li>Click the <strong>Save</strong> icon (💾)</li>
+                        <li>Click <strong>Deploy</strong> → <strong>New deployment</strong></li>
+                        <li>Click the gear icon ⚙️ next to "Select type" → choose <strong>Web app</strong></li>
+                        <li>Set "Execute as" to <strong>Me</strong></li>
+                        <li>Set "Who has access" to <strong>Anyone</strong></li>
+                        <li>Click <strong>Deploy</strong></li>
+                        <li>Click <strong>Authorize access</strong> and complete the authorization</li>
+                        <li>Copy the <strong>Web app URL</strong> (looks like: https://script.google.com/...)</li>
+                    </ol>
+                </div>
+
+                <div class="setup-box">
+                    <h3>🔗 Step 3: Enter Your Web App URL</h3>
+                    
+                    <div class="form-group">
+                        <label for="webAppUrl">Google Apps Script Web App URL</label>
+                        <input type="text" id="webAppUrl" placeholder="Paste your Web App URL here" value="">
+                    </div>
+
+                    <button class="submit-btn" onclick="saveConfig()" style="width: 100%;">💾 Save Configuration</button>
+                </div>
+
+                <div class="setup-box" style="background: #d4edda; border-color: #28a745;">
+                    <h3>📋 Apps Script Code to Copy:</h3>
+                    <pre style="background: white; padding: 15px; border-radius: 5px; overflow-x: auto; font-size: 12px; line-height: 1.5;">
+function doGet(e) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Reports') || 
+                SpreadsheetApp.getActiveSpreadsheet().insertSheet('Reports');
+  
+  const lastRow = sheet.getLastRow();
+  if (lastRow === 0) {
+    return ContentService.createTextOutput(JSON.stringify([])).setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  const data = sheet.getRange(1, 1, lastRow, 1).getValues();
+  const reports = data[0][0] ? JSON.parse(data[0][0]) : [];
+  
+  return ContentService.createTextOutput(JSON.stringify(reports)).setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Reports') || 
+                SpreadsheetApp.getActiveSpreadsheet().insertSheet('Reports');
+  
+  const reports = JSON.parse(e.postData.contents);
+  sheet.clear();
+  sheet.getRange(1, 1).setValue(JSON.stringify(reports));
+  
+  return ContentService.createTextOutput(JSON.stringify({success: true})).setMimeType(ContentService.MimeType.JSON);
+}</pre>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important:</strong> Make sure your Google Sheet is set to "Anyone with the link can edit" for all supervisors to access it.
+                </div>
+            </div>
+        </div>
+
+        <!-- INPUT PAGE -->
+        <div id="inputPage" class="page active">
+            <div class="form-section">
+                <div class="shift-info">
+                    <div class="form-group">
+                        <label for="shiftDate">Date</label>
+                        <input type="date" id="shiftDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="handoverBy">Handed Over By</label>
+                        <input type="text" id="handoverBy" placeholder="Your name" required>
+                    </div>
+                </div>
+
+                <div id="jobsContainer"></div>
+
+                <button class="add-job-btn" onclick="addJob()">+ Add Job Entry</button>
+
+                <div class="button-group">
+                    <button class="submit-btn" id="saveBtn" onclick="saveReport()">💾 Save Report</button>
+                    <button class="export-btn" onclick="exportToExcel()">📊 Export to Excel</button>
+                    <button class="clear-btn" onclick="clearForm()">🗑️ Clear Form</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- REPORTS PAGE -->
+        <div id="reportsPage" class="page">
+            <div class="reports-section">
+                <h2>📋 Saved Reports</h2>
+                <div id="reportsContainer">
+                    <div class="loading">Loading reports</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="syncStatus" class="sync-status">✓ Synced</div>
+
+    <script>
+        let jobCounter = 0;
+        let jobImages = {};
+        let WEB_APP_URL = '';
+        let allReports = [];
+
+        window.onload = function() {
+            loadConfig();
+            document.getElementById('shiftDate').valueAsDate = new Date();
+            addJob();
+            
+            if (WEB_APP_URL) {
+                loadReports();
+            }
+        };
+
+        function loadConfig() {
+            WEB_APP_URL = localStorage.getItem('webAppUrl') || '';
+            document.getElementById('webAppUrl').value = WEB_APP_URL;
+            
+            if (!WEB_APP_URL) {
+                showNotification('⚠️ Please configure Google Apps Script in Setup tab', 5000);
+            }
+        }
+
+        function saveConfig() {
+            const url = document.getElementById('webAppUrl').value.trim();
+            
+            if (!url) {
+                alert('Please enter your Web App URL');
+                return;
+            }
+            
+            if (!url.includes('script.google.com')) {
+                alert('Invalid URL. Please enter a Google Apps Script Web App URL.');
+                return;
+            }
+            
+            localStorage.setItem('webAppUrl', url);
+            WEB_APP_URL = url;
+            
+            alert('Configuration saved! You can now create reports.');
+            switchPage('input');
+        }
+
+        function switchPage(pageName) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            if (pageName === 'input') {
+                document.getElementById('inputPage').classList.add('active');
+                document.querySelectorAll('.nav-tab')[0].classList.add('active');
+            } else if (pageName === 'reports') {
+                document.getElementById('reportsPage').classList.add('active');
+                document.querySelectorAll('.nav-tab')[1].classList.add('active');
+                loadReports();
+            } else if (pageName === 'setup') {
+                document.getElementById('setupPage').classList.add('active');
+                document.querySelectorAll('.nav-tab')[2].classList.add('active');
+            }
+        }
+
+        function addJob() {
+            jobCounter++;
+            const jobsContainer = document.getElementById('jobsContainer');
+            
+            const jobEntry = document.createElement('div');
+            jobEntry.className = 'job-entry';
+            jobEntry.id = `job-${jobCounter}`;
+            
+            jobEntry.innerHTML = `
+                <div class="job-entry-header">
+                    <span class="job-entry-title">Job Entry #${jobCounter}</span>
+                    <button class="remove-btn" onclick="removeJob(${jobCounter})">Remove</button>
+                </div>
+                <div class="form-group">
+                    <label for="jobNumber-${jobCounter}">Job Number</label>
+                    <input type="text" id="jobNumber-${jobCounter}" placeholder="e.g., 2024-045" required>
+                </div>
+                <div class="form-group">
+                    <label for="workDone-${jobCounter}">Work Completed This Shift</label>
+                    <textarea id="workDone-${jobCounter}" class="bullet-textarea" placeholder="• Type your first point here
+• Press Enter for a new bullet point
+• Each line becomes a bullet" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="workPending-${jobCounter}">Work to be Done / Next Steps</label>
+                    <textarea id="workPending-${jobCounter}" class="bullet-textarea" placeholder="• Type your first point here
+• Press Enter for a new bullet point
+• Each line becomes a bullet" required></textarea>
+                </div>
+                <div class="image-upload-section">
+                    <label class="image-upload-label" for="imageUpload-${jobCounter}">
+                        📷 Add Photos
+                    </label>
+                    <input type="file" id="imageUpload-${jobCounter}" class="image-upload-input" accept="image/*" multiple onchange="handleImageUpload(${jobCounter}, event)">
+                    <div id="imagePreview-${jobCounter}" class="image-preview-container"></div>
+                </div>
+            `;
+            
+            jobsContainer.appendChild(jobEntry);
+            jobImages[jobCounter] = [];
+            
+            setupBulletTextarea(`workDone-${jobCounter}`);
+            setupBulletTextarea(`workPending-${jobCounter}`);
+        }
+
+        function setupBulletTextarea(id) {
+            const textarea = document.getElementById(id);
+            if (!textarea) return;
+
+            textarea.addEventListener('focus', function() {
+                if (this.value === '') {
+                    this.value = '• ';
+                }
+            });
+
+            textarea.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const cursorPos = this.selectionStart;
+                    const textBefore = this.value.substring(0, cursorPos);
+                    const textAfter = this.value.substring(cursorPos);
+                    
+                    this.value = textBefore + '\n• ' + textAfter;
+                    
+                    const newCursorPos = cursorPos + 3;
+                    this.selectionStart = newCursorPos;
+                    this.selectionEnd = newCursorPos;
+                }
+                
+                if (e.key === 'Backspace') {
+                    const cursorPos = this.selectionStart;
+                    const textBefore = this.value.substring(0, cursorPos);
+                    
+                    if (textBefore.endsWith('• ')) {
+                        e.preventDefault();
+                        const newText = textBefore.slice(0, -3);
+                        const textAfter = this.value.substring(cursorPos);
+                        this.value = newText + textAfter;
+                        this.selectionStart = newText.length;
+                        this.selectionEnd = newText.length;
+                    }
+                }
+            });
+        }
+
+        function handleImageUpload(jobId, event) {
+            const files = event.target.files;
+            if (!jobImages[jobId]) {
+                jobImages[jobId] = [];
+            }
+
+            Array.from(files).forEach(file => {
+                if (file.size > 500 * 1024) {
+                    alert('Image too large. Please use images under 500KB.');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    jobImages[jobId].push(e.target.result);
+                    displayImages(jobId);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function displayImages(jobId) {
+            const container = document.getElementById(`imagePreview-${jobId}`);
+            if (!container) return;
+
+            container.innerHTML = jobImages[jobId].map((img, index) => `
+                <div class="image-preview">
+                    <img src="${img}" alt="Job photo ${index + 1}">
+                    <button class="image-remove-btn" onclick="removeImage(${jobId}, ${index})">&times;</button>
+                </div>
+            `).join('');
+        }
+
+        function removeImage(jobId, imageIndex) {
+            jobImages[jobId].splice(imageIndex, 1);
+            displayImages(jobId);
+        }
+
+        function removeJob(id) {
+            const jobEntry = document.getElementById(`job-${id}`);
+            if (jobEntry) {
+                jobEntry.remove();
+                delete jobImages[id];
+            }
+        }
+
+        async function saveReport() {
+            if (!WEB_APP_URL) {
+                alert('Please configure Google Apps Script in the Setup tab first!');
+                switchPage('setup');
+                return;
+            }
+
+            const date = document.getElementById('shiftDate').value;
+            const handoverBy = document.getElementById('handoverBy').value;
+
+            if (!date || !handoverBy) {
+                alert('Please fill in all shift information fields');
+                return;
+            }
+
+            const jobs = [];
+            const jobEntries = document.querySelectorAll('.job-entry');
+            
+            jobEntries.forEach((entry) => {
+                const id = entry.id.split('-')[1];
+                const jobNumber = document.getElementById(`jobNumber-${id}`).value;
+                const workDone = document.getElementById(`workDone-${id}`).value;
+                const workPending = document.getElementById(`workPending-${id}`).value;
+                const images = jobImages[id] || [];
+
+                if (jobNumber && (workDone || workPending)) {
+                    jobs.push({
+                        jobNumber,
+                        workDone,
+                        workPending,
+                        images
+                    });
+                }
+            });
+
+            if (jobs.length === 0) {
+                alert('Please add at least one job entry');
+                return;
+            }
+
+            const saveBtn = document.getElementById('saveBtn');
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Saving...';
+
+            try {
+                await loadReportsData();
+                
+                const existingReportIndex = allReports.findIndex(r => r.date === date);
+                
+                if (existingReportIndex !== -1) {
+                    allReports[existingReportIndex].jobs.push(...jobs);
+                    allReports[existingReportIndex].timestamp = new Date().toISOString();
+                    allReports[existingReportIndex].handoverBy = handoverBy;
+                } else {
+                    allReports.unshift({
+                        id: Date.now(),
+                        date,
+                        handoverBy,
+                        jobs,
+                        timestamp: new Date().toISOString()
+                    });
+                }
+
+                await saveToCloud();
+                
+                showNotification('✓ Report saved successfully!');
+                clearForm();
+                switchPage('reports');
+            } catch (error) {
+                console.error('Error saving report:', error);
+                alert('Error saving report: ' + error.message);
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = '💾 Save Report';
+            }
+        }
+
+        async function saveToCloud() {
+            const response = await fetch(WEB_APP_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(allReports)
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to save to Google Sheets');
+            }
+        }
+
+        async function loadReportsData() {
+            try {
+                const response = await fetch(WEB_APP_URL);
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load from Google Sheets');
+                }
+                
+                allReports = await response.json();
+            } catch (error) {
+                console.error('Error loading reports:', error);
+                allReports = [];
+            }
+        }
+
+        async function loadReports() {
+            if (!WEB_APP_URL) {
+                document.getElementById('reportsContainer').innerHTML = '<div class="no-reports">Please configure Google Apps Script in Setup tab</div>';
+                return;
+            }
+
+            document.getElementById('reportsContainer').innerHTML = '<div class="loading">Loading reports</div>';
+            
+            await loadReportsData();
+            displayReports();
+        }
+
+        function displayReports() {
+            const container = document.getElementById('reportsContainer');
+
+            if (allReports.length === 0) {
+                container.innerHTML = '<div class="no-reports">No reports saved yet</div>';
+                return;
+            }
+
+            container.innerHTML = allReports.map(report => `
+                <div class="report-item" id="report-item-${report.id}" onclick="toggleReport(${report.id})">
+                    <div class="report-summary">
+                        <div>
+                            <div class="report-date">${new Date(report.date).toLocaleDateString('en-AU', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                            <div class="report-meta">By: ${report.handoverBy}</div>
+                        </div>
+                        <span class="report-expand-icon">▶</span>
+                    </div>
+                    <div class="report-details">
+                        <div class="report-header" style="border: none; padding: 0; margin-bottom: 15px;">
+                            <div class="report-meta" style="font-size: 12px;">Saved: ${new Date(report.timestamp).toLocaleString()}</div>
+                            <div class="report-actions" onclick="event.stopPropagation()">
+                                <button class="edit-report-btn" onclick="editReport(${report.id})">✏️ Edit</button>
+                                <button class="export-report-btn" onclick="exportSavedReport(${report.id})">📊 Export</button>
+                                <button class="delete-report-btn" onclick="deleteReport(${report.id})">Delete</button>
+                            </div>
+                        </div>
+                        <div class="report-jobs">
+                            ${report.jobs.map((job, jobIndex) => `
+                                <div class="report-job">
+                                    <strong>Job #${job.jobNumber}</strong>
+                                    ${job.workDone ? `<p><strong>Work Done:</strong></p><div style="white-space: pre-wrap; line-height: 1.8;">${job.workDone}</div>` : ''}
+                                    ${job.workPending ? `<p><strong>Work Pending:</strong></p><div style="white-space: pre-wrap; line-height: 1.8;">${job.workPending}</div>` : ''}
+                                    ${job.images && job.images.length > 0 ? `
+                                        <div style="margin-top: 10px;">
+                                            <strong>Photos:</strong>
+                                            <div class="image-preview-container">
+                                                ${job.images.map(img => `
+                                                    <div class="image-preview">
+                                                        <img src="${img}" alt="Job photo">
+                                                    </div>
+                                                `).join('')}
+                                            </div>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleReport(reportId) {
+            const reportItem = document.getElementById(`report-item-${reportId}`);
+            reportItem.classList.toggle('expanded');
+        }
+
+        async function editReport(reportId) {
+            event.stopPropagation();
+            
+            const report = allReports.find(r => r.id === reportId);
+            
+            if (!report) {
+                alert('Report not found');
+                return;
+            }
+
+            switchPage('input');
+            
+            document.getElementById('jobsContainer').innerHTML = '';
+            jobCounter = 0;
+            jobImages = {};
+            
+            document.getElementById('shiftDate').value = report.date;
+            document.getElementById('handoverBy').value = report.handoverBy;
+            
+            report.jobs.forEach(job => {
+                addJob();
+                const currentJobId = jobCounter;
+                
+                document.getElementById(`jobNumber-${currentJobId}`).value = job.jobNumber;
+                document.getElementById(`workDone-${currentJobId}`).value = job.workDone;
+                document.getElementById(`workPending-${currentJobId}`).value = job.workPending;
+                
+                if (job.images && job.images.length > 0) {
+                    jobImages[currentJobId] = [...job.images];
+                    displayImages(currentJobId);
+                }
+            });
+            
+            allReports = allReports.filter(r => r.id !== reportId);
+            await saveToCloud();
+        }
+
+        async function deleteReport(id) {
+            event.stopPropagation();
+            
+            if (!confirm('Are you sure you want to delete this report?')) {
+                return;
+            }
+
+            allReports = allReports.filter(r => r.id !== id);
+            
+            try {
+                await saveToCloud();
+                showNotification('✓ Report deleted');
+                displayReports();
+            } catch (error) {
+                alert('Error deleting report: ' + error.message);
+            }
+        }
+
+        function exportSavedReport(reportId) {
+            event.stopPropagation();
+            
+            const report = allReports.find(r => r.id === reportId);
+            
+            if (!report) {
+                alert('Report not found');
+                return;
+            }
+
+            let csvContent = "Shift Handover Report\n";
+            csvContent += `Date:,${new Date(report.date).toLocaleDateString()}\n`;
+            csvContent += `Handed Over By:,${report.handoverBy}\n`;
+            csvContent += "\n";
+            csvContent += "Job Number,Work Completed,Work Pending\n";
+            
+            report.jobs.forEach(job => {
+                const workDone = job.workDone.replace(/"/g, '""');
+                const workPending = job.workPending.replace(/"/g, '""');
+                csvContent += `"${job.jobNumber}","${workDone}","${workPending}"\n`;
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            const fileName = `Shift_Handover_${report.date}_${report.handoverBy.replace(/\s+/g, '_')}.csv`;
+            link.setAttribute('href', url);
+            link.setAttribute('download', fileName);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function exportToExcel() {
+            const date = document.getElementById('shiftDate').value;
+            const handoverBy = document.getElementById('handoverBy').value;
+
+            if (!date || !handoverBy) {
+                alert('Please fill in date and name before exporting');
+                return;
+            }
+
+            const jobs = [];
+            const jobEntries = document.querySelectorAll('.job-entry');
+            
+            jobEntries.forEach((entry) => {
+                const id = entry.id.split('-')[1];
+                const jobNumber = document.getElementById(`jobNumber-${id}`).value;
+                const workDone = document.getElementById(`workDone-${id}`).value;
+                const workPending = document.getElementById(`workPending-${id}`).value;
+
+                if (jobNumber && (workDone || workPending)) {
+                    jobs.push({
+                        jobNumber,
+                        workDone,
+                        workPending
+                    });
+                }
+            });
+
+            if (jobs.length === 0) {
+                alert('Please add at least one job entry before exporting');
+                return;
+            }
+
+            let csvContent = "Shift Handover Report\n";
+            csvContent += `Date:,${new Date(date).toLocaleDateString()}\n`;
+            csvContent += `Handed Over By:,${handoverBy}\n`;
+            csvContent += "\n";
+            csvContent += "Job Number,Work Completed,Work Pending\n";
+            
+            jobs.forEach(job => {
+                const workDone = job.workDone.replace(/"/g, '""');
+                const workPending = job.workPending.replace(/"/g, '""');
+                csvContent += `"${job.jobNumber}","${workDone}","${workPending}"\n`;
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            const fileName = `Shift_Handover_${date}_${handoverBy.replace(/\s+/g, '_')}.csv`;
+            link.setAttribute('href', url);
+            link.setAttribute('download', fileName);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function clearForm() {
+            document.getElementById('shiftDate').valueAsDate = new Date();
+            document.getElementById('handoverBy').value = '';
+            document.getElementById('jobsContainer').innerHTML = '';
+            jobCounter = 0;
+            jobImages = {};
+            addJob();
+        }
+
+        function showNotification(message, duration = 2000) {
+            const status = document.getElementById('syncStatus');
+            status.textContent = message;
+            status.classList.add('show');
+            
+            setTimeout(() => {
+                status.classList.remove('show');
+            }, duration);
+        }
+    </script>
+</body>
+</html>
