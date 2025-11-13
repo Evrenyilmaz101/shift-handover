@@ -482,6 +482,95 @@
                 display: none;
             }
         }
+
+        /* Mobile Optimization */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .header p {
+                font-size: 12px;
+            }
+
+            .nav-tab {
+                padding: 12px 10px;
+                font-size: 14px;
+            }
+
+            .form-section, .reports-section {
+                padding: 15px;
+            }
+
+            .shift-info {
+                grid-template-columns: 1fr;
+                gap: 15px;
+                padding: 15px;
+            }
+
+            .job-entry {
+                padding: 15px;
+            }
+
+            input, textarea {
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+
+            .button-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .submit-btn, .export-btn, .clear-btn {
+                padding: 18px;
+                font-size: 16px;
+            }
+
+            .add-job-btn {
+                width: 100%;
+                padding: 15px;
+            }
+
+            .remove-btn {
+                padding: 10px 15px;
+            }
+
+            .report-date {
+                font-size: 16px;
+            }
+
+            .report-expand-icon {
+                font-size: 18px;
+            }
+
+            .report-job {
+                padding: 12px;
+            }
+
+            .report-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .edit-report-btn, .export-report-btn, .delete-report-btn {
+                width: 100%;
+                padding: 10px;
+                margin: 5px 0;
+            }
+
+            .report-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .report-meta {
+                margin-bottom: 10px;
+            }
+        }
     </style>
 </head>
 <body>
