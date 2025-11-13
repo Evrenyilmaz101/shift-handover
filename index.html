@@ -745,7 +745,14 @@ function doGet(e) {
                     </div>
                     <div class="form-group">
                         <label for="handoverBy">Handed Over By</label>
-                        <input type="text" id="handoverBy" placeholder="Your name" required>
+                        <select id="handoverBy" required onchange="toggleCustomName()">
+                            <option value="">Select your name</option>
+                            <option value="Ted Dangerfield">Ted Dangerfield</option>
+                            <option value="Logan Hazelwood">Logan Hazelwood</option>
+                            <option value="Ramo Djurovic">Ramo Djurovic</option>
+                            <option value="Other">Other (type name)</option>
+                        </select>
+                        <input type="text" id="customName" placeholder="Enter your name" style="display: none; margin-top: 10px;">
                     </div>
                 </div>
 
@@ -837,6 +844,20 @@ function doGet(e) {
             } else if (pageName === 'setup') {
                 document.getElementById('setupPage').classList.add('active');
                 document.querySelectorAll('.nav-tab')[2].classList.add('active');
+            }
+        }
+
+        function toggleCustomName() {
+            const select = document.getElementById('handoverBy');
+            const customInput = document.getElementById('customName');
+            
+            if (select.value === 'Other') {
+                customInput.style.display = 'block';
+                customInput.required = true;
+            } else {
+                customInput.style.display = 'none';
+                customInput.required = false;
+                customInput.value = '';
             }
         }
 
@@ -932,7 +953,11 @@ function doGet(e) {
             }
 
             const date = document.getElementById('shiftDate').value;
-            const handoverBy = document.getElementById('handoverBy').value;
+            const handoverBySelect = document.getElementById('handoverBy').value;
+            const customName = document.getElementById('customName').value;
+            
+            // Get the actual name - either from dropdown or custom input
+            const handoverBy = handoverBySelect === 'Other' ? customName : handoverBySelect;
 
             if (!date || !handoverBy) {
                 alert('Please fill in all shift information fields');
@@ -1105,7 +1130,22 @@ function doGet(e) {
             jobCounter = 0;
             
             document.getElementById('shiftDate').value = report.date;
-            document.getElementById('handoverBy').value = report.handoverBy;
+            
+            // Set the handoverBy dropdown
+            const handoverBySelect = document.getElementById('handoverBy');
+            const customNameInput = document.getElementById('customName');
+            
+            // Check if the name is in the dropdown
+            const optionExists = Array.from(handoverBySelect.options).some(option => option.value === report.handoverBy);
+            
+            if (optionExists) {
+                handoverBySelect.value = report.handoverBy;
+            } else {
+                // Name not in dropdown, use "Other" option
+                handoverBySelect.value = 'Other';
+                customNameInput.style.display = 'block';
+                customNameInput.value = report.handoverBy;
+            }
             
             report.jobs.forEach(job => {
                 addJob();
@@ -1175,7 +1215,9 @@ function doGet(e) {
 
         function exportToExcel() {
             const date = document.getElementById('shiftDate').value;
-            const handoverBy = document.getElementById('handoverBy').value;
+            const handoverBySelect = document.getElementById('handoverBy').value;
+            const customName = document.getElementById('customName').value;
+            const handoverBy = handoverBySelect === 'Other' ? customName : handoverBySelect;
 
             if (!date || !handoverBy) {
                 alert('Please fill in date and name before exporting');
@@ -1233,6 +1275,8 @@ function doGet(e) {
         function clearForm() {
             document.getElementById('shiftDate').valueAsDate = new Date();
             document.getElementById('handoverBy').value = '';
+            document.getElementById('customName').value = '';
+            document.getElementById('customName').style.display = 'none';
             document.getElementById('jobsContainer').innerHTML = '';
             jobCounter = 0;
             addJob();
