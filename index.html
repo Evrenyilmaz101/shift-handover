@@ -550,21 +550,91 @@ function doGet(e) {
   // Check if this is a save operation
   if (e.parameter.action === 'save') {
     const reports = JSON.parse(e.parameter.data);
+    
+    // Clear and set up headers
     sheet.clear();
-    sheet.getRange(1, 1).setValue(JSON.stringify(reports));
+    sheet.getRange(1, 1, 1, 6).setValues([['Date', 'Handed Over By', 'Job Number', 'Work Done', 'Work Pending', 'Timestamp']]);
+    sheet.getRange(1, 1, 1, 6).setFontWeight('bold');
+    
+    // Write each job as a row
+    let rowIndex = 2;
+    reports.forEach(report => {
+      report.jobs.forEach(job => {
+        sheet.getRange(rowIndex, 1, 1, 6).setValues([[
+          report.date,
+          report.handoverBy,
+          job.jobNumber,
+          job.workDone,
+          job.workPending,
+          report.timestamp
+        ]]);
+        rowIndex++;
+      });
+    });
+    
+    // Auto-resize columns
+    sheet.autoResizeColumns(1, 6);
+    
     return ContentService.createTextOutput(JSON.stringify({success: true}))
       .setMimeType(ContentService.MimeType.JSON);
   }
   
-  // Otherwise, load data
+  // Load data - reconstruct from rows
   const lastRow = sheet.getLastRow();
-  if (lastRow === 0) {
+  if (lastRow <= 1) {
     return ContentService.createTextOutput(JSON.stringify([]))
       .setMimeType(ContentService.MimeType.JSON);
   }
   
-  const data = sheet.getRange(1, 1, lastRow, 1).getValues();
-  const reports = data[0][0] ? JSON.parse(data[0][0]) : [];
+  const data = sheet.getRange(2, 1, lastRow - 1, 6).getValues();
+  
+  // Reconstruct reports from rows
+  const reportsMap = {};
+  
+  data.forEach(row => {
+    const dateValue = row[0];
+    const handoverBy = row[1];
+    const jobNumber = row[2];
+    const workDone = row[3];
+    const workPending = row[4];
+    const timestampValue = row[5];
+    
+    // Convert date to YYYY-MM-DD format
+    let dateString;
+    if (dateValue instanceof Date) {
+      dateString = Utilities.formatDate(dateValue, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+    } else {
+      dateString = dateValue;
+    }
+    
+    // Ensure timestamp is ISO string
+    let timestampString;
+    if (timestampValue instanceof Date) {
+      timestampString = timestampValue.toISOString();
+    } else if (typeof timestampValue === 'string') {
+      timestampString = timestampValue;
+    } else {
+      timestampString = new Date().toISOString();
+    }
+    
+    if (!reportsMap[dateString]) {
+      reportsMap[dateString] = {
+        id: new Date(dateString).getTime(),
+        date: dateString,
+        handoverBy: handoverBy,
+        jobs: [],
+        timestamp: timestampString
+      };
+    }
+    
+    reportsMap[dateString].jobs.push({
+      jobNumber: jobNumber,
+      workDone: workDone,
+      workPending: workPending
+    });
+  });
+  
+  const reports = Object.values(reportsMap);
   
   return ContentService.createTextOutput(JSON.stringify(reports))
     .setMimeType(ContentService.MimeType.JSON);
