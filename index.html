@@ -622,7 +622,7 @@
                     
                     <div class="form-group">
                         <label for="webAppUrl">Google Apps Script Web App URL</label>
-                        <input type="text" id="webAppUrl" placeholder="https://script.google.com/macros/s/AKfycbyxjRxkh6QJukm_8j4ExFhunPT_wgYLzqSeVyODMjpAdn5sys8gW3ZpG3WcfSY5y96LRQ/exec" value="">
+                        <input type="text" id="webAppUrl" placeholder="Paste your Web App URL here" value="">
                     </div>
 
                     <button class="submit-btn" onclick="saveConfig()" style="width: 100%;">💾 Save Configuration</button>
@@ -783,7 +783,7 @@ function doGet(e) {
 
     <script>
         let jobCounter = 0;
-        let WEB_APP_URL = '';
+        let WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyxjRxkh6QJukm_8j4ExFhunPT_wgYLzqSeVyODMjpAdn5sys8gW3ZpG3WcfSY5y96LRQ/exec';
         let allReports = [];
 
         window.onload = function() {
@@ -797,12 +797,7 @@ function doGet(e) {
         };
 
         function loadConfig() {
-            WEB_APP_URL = localStorage.getItem('webAppUrl') || '';
-            document.getElementById('webAppUrl').value = WEB_APP_URL;
-            
-            if (!WEB_APP_URL) {
-                showNotification('⚠️ Please configure Google Apps Script in Setup tab', 5000);
-            }
+            // URL is now hard-coded, no configuration needed
         }
 
         function saveConfig() {
@@ -946,12 +941,6 @@ function doGet(e) {
         }
 
         async function saveReport() {
-            if (!WEB_APP_URL) {
-                alert('Please configure Google Apps Script in the Setup tab first!');
-                switchPage('setup');
-                return;
-            }
-
             const date = document.getElementById('shiftDate').value;
             const handoverBySelect = document.getElementById('handoverBy').value;
             const customName = document.getElementById('customName').value;
@@ -1058,11 +1047,6 @@ function doGet(e) {
         }
 
         async function loadReports() {
-            if (!WEB_APP_URL) {
-                document.getElementById('reportsContainer').innerHTML = '<div class="no-reports">Please configure Google Apps Script in Setup tab</div>';
-                return;
-            }
-
             document.getElementById('reportsContainer').innerHTML = '<div class="loading">Loading reports</div>';
             
             await loadReportsData();
